@@ -1,0 +1,36 @@
+.root {
+    display: flex;
+    flex-flow: column nowrap;
+    width: 300px;
+    background-color: white;
+    position: absolute;
+    align-items: flex-start;
+    border: 1px solid lightgray;
+    padding-bottom: 10px;
+}
+
+
+.title{
+    display:flex;
+    width: 290px;
+    height: 45px;
+    background-color: #f2f2f2;
+    line-height:45px;
+    padding-left: 10px;
+}
+
+
+.list{
+    width: 100%;
+    margin-bottom: 20px;
+    /* background-color: blue; */
+}
+
+.btnGroup{
+    display: flex;
+    flex-flow: row nowrap;
+    width: 100%;
+    justify-content: space-around;
+    position: relative;
+    /* background-color: green; */
+}

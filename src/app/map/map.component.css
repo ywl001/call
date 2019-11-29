@@ -1,0 +1,29 @@
+#map {
+    flex: 1;
+    height: 100%;
+    position: relative;
+    background-color: aqua;
+}
+
+#btnClear {
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    color: lightcoral
+}
+
+.form {
+    width: 100%;
+    position: absolute;
+    bottom: 0px;
+    left: 5px;
+    background-color: beige;
+}
+
+.isHide{
+    display: none;
+}
+
+.radioButton {
+    margin: 10px;
+}

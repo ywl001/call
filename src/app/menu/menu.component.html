@@ -1,0 +1,32 @@
+<div class="root">
+  <div class="file">
+    <mat-radio-group class="file" [selected]="choseType" (change)=onTypeChange($event)>
+      <mat-radio-button class="toggle" value="移动">移动</mat-radio-button>
+      <mat-radio-button class="toggle" value='联通'>联通</mat-radio-button>
+      <mat-radio-button class="toggle" value='电信'>电信</mat-radio-button>
+    </mat-radio-group>
+    <button mat-raised-button id="btnAdd" color="primary" (click)="onAddFile()">添加话单</button>
+    <input type="file" style="display:none" id="inputFile" (change)=onFileChange($event)>
+  </div>
+  <hr>
+  <div class="list">
+    <button mat-flat-button id="btnCommonContacts" color="accent" (click)="onGetCommonContacts()">多话单的共同联系人
+    </button>
+    <mat-accordion multi=false displayMode="flat">
+      <mat-expansion-panel *ngFor="let item of tables" (click)="onClickItem(item.name)">
+        <mat-expansion-panel-header>{{item.name}}</mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+          <mat-nav-list [class.disabled]='isMenuDisable'>
+            <mat-list-item (click)="onShowRecords(item.name)" (mouseover)=onOverMenu($event)> 通话详单 </mat-list-item>
+            <mat-list-item (click)="onCountRecord(item.name)" (mouseover)=onOverMenu($event)> 话单统计 </mat-list-item>
+            <mat-list-item (click)="onNightRecord(item.name)" (mouseover)=onOverMenu($event)> 晚上通话 </mat-list-item>
+            <mat-list-item (click)="onTopTenStations(item.name)" (mouseover)=onOverMenu($event)> 基站前十 </mat-list-item>
+            <mat-list-item (click)="onRemoveTable(item.name)" (mouseover)=onOverMenu($event)> 删除话单 </mat-list-item>
+          </mat-nav-list>
+        </ng-template>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+  <button mat-button class="help" routerLink="/help">使用说明</button>
+  
+</div>

@@ -1,0 +1,83 @@
+.root{
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+#btnLocation{
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    opacity: 0;
+}
+
+#btnLocation:hover{
+    opacity:1;
+}
+
+.btnFilterGroup{
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    right: 20px;
+    bottom: 60px;
+    opacity: 0.5;
+    /* background-color: aquamarine */
+}
+
+.btnFilterGroup:hover{
+    opacity: 1;
+}
+
+.btnFilter{
+    width:35px;
+    height: 35px;
+    background-size: cover;
+    margin-bottom: 2px;
+    background-color: blanchedalmond;
+}
+
+.imgClearFilter{
+    background-image: url('../../assets/clear_filter.png'); 
+}
+
+.imgClearFilter:hover{
+    background-image: url('../../assets/clear_filter_over.png');
+}
+
+.btnBack{
+    background-image: url('../../assets/back.svg');
+    background-size:cover;
+    position: absolute;
+    left: 5px;
+    top:0px;
+    bottom: 0px;
+    margin: auto;
+    width:35px;
+    height: 35px;
+    cursor: pointer;
+}
+
+.btnBack:hover{
+    background-image: url('../../assets/back_over.svg');
+}
+
+.btnExcel{
+    background-image: url('../../assets/excel.svg');
+    background-size:cover;
+    position: absolute;
+    left: 5px;
+    bottom: 10px;
+    width:35px;
+    height: 35px;
+    cursor: pointer;
+    opacity: 0;
+}
+
+.btnExcel:hover{
+    opacity: 1;
+}
+
+.hide{
+    display: none;
+}

@@ -1,0 +1,73 @@
+#root {
+    display: flex;
+    display: -webkit-flex;
+    flex-flow: row nowrap;
+    width:100%;
+    height: 100%;
+}
+
+/* 左边容器，话单名称 */
+#leftContainer {
+    width: 260px;
+    height: 100%;
+    /* background-color: aqua; */
+    position: relative;
+    align-self: flex-start;
+    overflow-x: hidden;
+}
+
+/* 中间容器，表格 */
+#middleContainer {
+    width: 0px;
+    height: 100%;
+    position: relative;
+    border-right: 2px solid black;
+}
+
+/* 右边容器，地图 */
+#rightContainer {
+    flex: 1;
+    align-self: flex-end;
+    height: 100%;
+    position: relative;
+    /* background-color: lightgray; */
+}
+
+/* 容器开关按钮，基本 */
+#btnToggleLeft {
+    width: 20px;
+    height: 20px;
+    top: 5px;
+    position: absolute;
+    cursor: pointer;
+    background-size: cover;
+    left: 265px;
+    background-image: url('../assets/open.png');
+}
+
+#btnToggleLeft:hover {
+    background-image: url('../assets/open.png');
+}
+
+#commonContactsContainer{
+    left: -350px;
+    position: absolute;
+    top: 100px;
+    z-index: 10000;
+    background-color: blueviolet;
+    width: 300px;
+}
+
+.preLoad{
+    /* position: absolute;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    top: 0px;
+    margin: auto; */
+    background-color: blueviolet;
+    opacity: 0.3;
+    width: 100%;
+    height: 100%;
+}
+

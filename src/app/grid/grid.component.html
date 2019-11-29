@@ -1,0 +1,44 @@
+<div class="root">
+        <ag-grid-angular
+            #agGrid
+            style="width: 100%; height: 100%;"
+            class="ag-theme-balham"
+            [rowData]="gridData"
+            suppressColumnVirtualisation
+            animateRows
+            [modules]="modules"
+            [columnDefs] = "columnDefs"
+            [frameworkComponents]="frameworkComponents"
+            [localeText] = "localeText"
+            (gridReady)="onGridReady($event)"
+            (rowDataChanged)="onRowDataChange($event)"
+            (modelUpdated)="onDataChange($event)"
+            (cellClicked)="onClickConfirm($event)"
+            (cellDoubleClicked)="onDoubleClick($event)"
+            (cellValueChanged)="onCellValueChange($event)"
+        ></ag-grid-angular>
+    
+        <button
+            id="btnLocation"
+            [class.hide]="!isShowBtnLocation"
+            mat-raised-button
+            color="primary"
+            (click)="onShowLocations($event)"
+        >
+            显示基站位置
+        </button>
+    
+        <div #btnGroup class="btnFilterGroup" [class.hide]="!isShowBtnSave">
+            <div
+                class="btnFilter"
+                *ngFor="let item of [1,2,3,4,5]"
+                [style.background-image]="getBtnSaveIconUrl(item)"
+                (click)="onClickBtnSave(item)"
+                (dblclick)="onDoubleClickBtnSave(item)"
+            ></div>
+            <div class="btnFilter imgClearFilter" (click)="onClearFilter()"></div>
+        </div>
+    
+        <div class="btnBack" [class.hide]="!isShowBtnBack" (click)="onClickBack()"></div>
+        <div class="btnExcel" matTooltip="导出excel" (click)="onClickExcel()"></div>
+    </div>

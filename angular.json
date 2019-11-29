@@ -24,9 +24,21 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
+              "src/styles.css",
+              "node_modules/angular2-draggable/css/resizable.min.css",
+              "node_modules/toastr/build/toastr.min.css",
+              "node_modules/pure-css-loader/dist/css-loader.css",
+              "src/assets/alertify.core.css",
+              "src/assets/alertify.default.css"
             ],
-            "scripts": []
+            "scripts": [
+              "src/assets/WebSQL.min.js",
+              "src/assets/detect-element-resize.js",
+              "src/assets/alertify.min.js",
+              "node_modules/toastr/build/toastr.min.js",
+              "node_modules/gcoord/dist/gcoord.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -89,6 +101,7 @@
               "src/assets"
             ],
             "styles": [
+              "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.css"
             ],
             "scripts": []
@@ -120,6 +133,7 @@
           }
         }
       }
-    }},
+    }
+  },
   "defaultProject": "hdzs"
 }

@@ -1,0 +1,15 @@
+<div class="root">
+  <div class="title">请选择话单：</div>
+
+    <mat-selection-list class="list" #commonContactsList>
+      <mat-list-option *ngFor="let item of tables" value="{{item.name}}">
+        {{item.name}}
+      </mat-list-option>
+    </mat-selection-list>
+  
+
+  <div class="btnGroup">
+    <button mat-flat-button color="accent" (click)='onClickCancel()'>取消</button>
+    <button mat-flat-button color="primary" (click)='onClickOk(commonContactsList)'>确定</button>
+  </div>
+</div>
