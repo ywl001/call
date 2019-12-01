@@ -15,6 +15,35 @@
     opacity:1;
 }
 
+.btnColorGroup{
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    right: 20px;
+    bottom: 300px;
+    /* opacity: 0.5; */
+    /* background-color: aquamarine */
+}
+
+
+
+.btnColor{
+    width:35px;
+    height: 35px;
+    background-size: cover;
+    margin-bottom: 2px;
+    opacity: 0.5;
+    background-color: blanchedalmond;
+}
+
+.btnColor:hover{
+    opacity: 1;
+}
+
+.imgClearStyle{
+    background-image: url('../../assets/clear_style.png'); 
+}
+
 .btnFilterGroup{
     display: flex;
     flex-direction: column;
@@ -80,4 +109,9 @@
 
 .hide{
     display: none;
+}
+
+.ag-row-hover {
+    /* putting in !important so it overrides the theme's styling as it hovers the row also */
+    background-color: #fff !important;
 }

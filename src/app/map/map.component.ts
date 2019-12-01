@@ -11,7 +11,6 @@ declare var BMapLib;
 declare var BMAP_DRAWING_CIRCLE;
 declare var BMAP_DRAWING_POLYGON;
 declare var BMAP_DRAWING_RECTANGLE;
-declare var BMAP_STATUS_SUCCESS;
 
 @Component({
   selector: 'app-map',
@@ -364,7 +363,6 @@ export class MapComponent implements OnInit {
   /**基站图标双击，显示基站对应的通话记录 */
   private onMarkerDoubleClick(e) {
     let station: Station = e.target.attributes;
-    EventBus.dispatch(EventType.OPEN_MIDDLE, 1)
     let records = this.getRecordsByStations([station]);
     EventBus.dispatch(EventType.SHOW_RECORDS, {data:records,state:Model.RECORDS_STATE});
   }

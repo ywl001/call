@@ -70,20 +70,20 @@ export class GridComponent {
 
     this.frameworkComponents = {
       myFilter: OtherNumberFilterComponent,
-      myTooltip:OtherNumberTooltipComponent
+      myTooltip: OtherNumberTooltipComponent
     }
 
     /**国际化文本 */
     this.localeText = {
-       // for text filter
-       contains: '包含',
-       notContains: '不包含',
-       startsWith: '开始于',
-       endsWith: '结束于',
-       filterOoo: '过滤。。。',
-       applyFilter: '过滤完成',
-       equals: '等于',
-       notEqual: '不等于',
+      // for text filter
+      contains: '包含',
+      notContains: '不包含',
+      startsWith: '开始于',
+      endsWith: '结束于',
+      filterOoo: '过滤。。。',
+      applyFilter: '过滤完成',
+      equals: '等于',
+      notEqual: '不等于',
     }
 
     EventBus.addEventListener(EventType.SHOW_RECORDS, e => { this.showRecords(e.target) });
@@ -122,7 +122,7 @@ export class GridComponent {
       EventBus.dispatch(EventType.OPEN_MIDDLE, 450);
     } else if (value == Model.RECORDS_COMMON_CONTACTS_STATE) {
       this.setBtnVisible(true, false, false);
-      this.setRowStyle("record");
+      this.setRowStyle("contactRecord");
       EventBus.dispatch(EventType.OPEN_MIDDLE, 1);
     }
     this.columnDefs = this.getColDefs(value);
@@ -159,6 +159,7 @@ export class GridComponent {
 
   /**设置行风格， none\record*/
   private setRowStyle(type) {
+    console.log('rowstyle')
     switch (type) {
       case "none":
         this.agGrid.gridOptions.getRowStyle = (params) => {
@@ -166,42 +167,64 @@ export class GridComponent {
         };
         break;
 
-      case "record":
+      case "contactRecord":
         this.agGrid.gridOptions.getRowStyle = (params) => {
-          //没有位置信息的行风格
-          if (params.data.lat == 0 || params.data.lng == 0) {
-            // console.log("noLocation:" + params.data.id)
-            return { background: '#Eeeeee', color: '#aaaaaa' }
-          }
-          //共同联系人话单详情行风格
-          if (params.data.话单名称) {
-            let tables = Model.tables;
-            // console.log(tables)
-            for (let i = 0; i < tables.length; i++) {
-              if (params.data.话单名称 == tables[i].name) {
-                let color;
-                switch (i % 4) {
-                  case 0:
-                    color = 'lightblue';
-                    break;
-                  case 1:
-                    color = 'lightgreen';
-                    break;
-                  case 2:
-                    color = 'lightskyblue';
-                    break;
-                  case 3:
-                    color = 'lightyellow';
-                    break;
+          let tables = Model.tables;
+          // console.log(tables)
+          for (let i = 0; i < tables.length; i++) {
+            if (params.data.话单名称 == tables[i].name) {
+              let color;
+              switch (i % 4) {
+                case 0:
+                  color = 'lightblue';
+                  break;
+                case 1:
+                  color = 'lightgreen';
+                  break;
+                case 2:
+                  color = 'lightskyblue';
+                  break;
+                case 3:
+                  color = 'lightyellow';
+                  break;
 
-                  default:
-                    color = 'lightgray'
-                    break;
-                }
-                return { background: color };
+                default:
+                  color = 'lightgray'
+                  break;
               }
+              return { background: color };
             }
           }
+        }
+        break;
+
+      case "record":
+        this.agGrid.gridOptions.getRowStyle = (params) => {
+          let color;
+          let background;
+          // if (params.data.lat == 0 || params.data.lng == 0) {
+          //   color = '#aaaaaa';
+          //   background = '#eeeeee';
+          // }
+          let key = Model.currentTable + '_' + params.data.id;
+          let value = this.localStorgeService.get(key);
+          switch (value) {
+            case '1':
+              color = '#ffff00';
+              background = '#ff0000'
+              break;
+
+            case '2':
+              color = '#ffffff';
+              background = '#34A835'
+              break;
+
+            case '3':
+              color = '#ffffff';
+              background = '#0000ff'
+              break;
+          }
+          return { color: color, background: background }
         }
         break;
     }
@@ -224,8 +247,7 @@ export class GridComponent {
       },
       valueSetter: (params) => {
         params.data.contact = params.newValue;
-      },
-
+      }
     }
     colDefs.push(col_otherNumber);
     let cols;
@@ -234,6 +256,8 @@ export class GridComponent {
         this.createColDef(Model.START_TIME_CN, Model.START_TIME),
         this.createColDef(Model.CALL_TYPE_CN, Model.CALL_TYPE),
         this.createColDef(Model.DURATION_CN, Model.DURATION),
+        this.createColDef(Model.LAC_CN, Model.LAC),
+        this.createColDef(Model.CI_CN, Model.CI)
       ]
     } else if (state == Model.RECORD_COUNT_STATE) {
       cols = [
@@ -266,7 +290,7 @@ export class GridComponent {
     for (let i = 0; i < data.length; i++) {
       let num = data[i][Model.OTHER_NUMBER];
       let o = Model.Contacts.get(num);
-      if (o){
+      if (o) {
         data[i][Model.CONTACT] = o.name;
         data[i][Model.INSERT_TIME] = o.insertTime;
       }
@@ -339,8 +363,8 @@ export class GridComponent {
       const num = rowData[Model.OTHER_NUMBER];
       console.time('get records by number')
       let data = this.getRecordsByNumber(num);
-      
-      this.showRecords({ data:data, state: Model.RECORDS_STATE })
+
+      this.showRecords({ data: data, state: Model.RECORDS_STATE })
     }
     //共同联系人号码详情
     else if (this.state == Model.COMMON_CONTACTS_STATE) {
@@ -405,6 +429,7 @@ export class GridComponent {
         }
       )
   }
+
 
   /** 单击按钮显示表中的基站位置*/
   onShowLocations(e) {
@@ -521,6 +546,30 @@ export class GridComponent {
       return `url(assets/f${index}_false.png)`;
     }
     return `url(assets/f${index}.png)`;
+  }
+
+  getBtnColorIconUrl(index) {
+    return `url(assets/c${index}.png)`;
+  }
+
+  onClickBtnStyle(index) {
+    let selectRows = this.gridApi.getSelectedRows();
+    for (let i = 0; i < selectRows.length; i++) {
+      const r = selectRows[i];
+      this.localStorgeService.set(Model.currentTable + '_' + r.id, index);
+    }
+    this.setRowStyle('record')
+    this.gridApi.redrawRows();
+  }
+
+  onClearStyle() {
+    let selectRows = this.gridApi.getSelectedRows();
+    for (let i = 0; i < selectRows.length; i++) {
+      const r = selectRows[i];
+      this.localStorgeService.remove(Model.currentTable + '_' + r.id)
+    }
+    this.setRowStyle('record')
+    this.gridApi.redrawRows();
   }
 
   onClickBack() {

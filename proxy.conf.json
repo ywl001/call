@@ -1,5 +1,5 @@
 {
-    "/hdzs": {
+    "/call": {
         "target": "http://localhost",
         "secure": false
     }

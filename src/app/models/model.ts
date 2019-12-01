@@ -132,7 +132,7 @@ export class Model {
     public static Contacts: Map<string, any>;
 
 
-    public static sqlUrl = '/hdzs/sql.php'
+    public static sqlUrl = '/call/sql.php'
 
     /**保存可能的表格列定义的字段，从本地assets/fields.json获取 */
     public static fieldsMap;
