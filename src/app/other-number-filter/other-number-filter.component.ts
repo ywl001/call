@@ -1,6 +1,7 @@
-import { Component, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, ViewChild, ViewContainerRef } from '@angular/core';
 import { IFilterAngularComp } from '@ag-grid-community/angular';
 import { IFilterParams, IDoesFilterPassParams, IAfterGuiAttachedParams } from '@ag-grid-community/core';
+import { Model } from '../models/model';
 
 @Component({
   selector: 'app-other-number-filter',
@@ -24,9 +25,10 @@ export class OtherNumberFilterComponent implements IFilterAngularComp {
 
   doesFilterPass(params: IDoesFilterPassParams): boolean {
     let text = this.text.toLocaleLowerCase();
-    let otherNumber = params.data.otherNumber;
-    let contact = params.data.contact;
-    if (otherNumber != '') {
+    let otherNumber = params.data[Model.OTHER_NUMBER];
+    let contact = params.data[Model.CONTACT];
+    console.log(otherNumber,contact)
+    if ( otherNumber && otherNumber != '') {
       if (otherNumber.indexOf(text) >= 0) {
         return true
       }

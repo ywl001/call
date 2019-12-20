@@ -19,7 +19,7 @@ export class EventType {
     public static CLOSE_LEFT: string = "closeLeft";
 
 
-    public static IS_TOGGLE_MIDDLE: string = "isToggleMiddle";
+    public static IS_CAN_RESIZE_MIDDLE: string = "isCanResizeMiddle";
 
     /** 显示对端号码统计信息 带表格数据参数*/
     // public static SHOW_RECORD_COUNT: string = "showRecordCount";
@@ -40,5 +40,16 @@ export class EventType {
     //是否显示busy图标
     public static IS_SHOW_BUSY_ICON: string = "isShowLoader";
 
+    /**设置鼠标光标，带鼠标光标的css可用的值 */
+    public static SET_CURSOR:string = 'setCursor';
 
+    /**拾取地图上的点，无参数 */
+    public static PICK_MAP:string = "pickMap";
+
+    /**拾取坐标完成，带data参数 data.lat,dat.lng 存储坐标经纬度 */
+    public static PICK_MAP_COMPLETE:string = "pickMapComplete";
+
+
+    
+    public static SHOW_DIALOG = "showDialog";
 }

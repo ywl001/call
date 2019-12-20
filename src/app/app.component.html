@@ -3,18 +3,22 @@
     <app-menu></app-menu>
   </div>
 
-  <div id="middleContainer" ngResizable [rzHandles]="'e'" (rzStop)="onDragResizeStop($event)" (dblclick)=onDoubleClickMiddle()>
+  <div id="middleContainer" ngResizable [rzHandles]="'e'" (rzStop)="onDragResizeStop($event)"
+    (dblclick)=onDoubleClickMiddle()>
     <app-grid></app-grid>
   </div>
+  
   <div id="rightContainer" (dblclick)=onDoubleClickRight()>
-      <router-outlet></router-outlet>
+    <router-outlet></router-outlet>
   </div>
 
   <div id="btnToggleLeft" class="toggleLeft" (click)="onToggleLeft()"></div>
-    
+
   <div id="commonContactsContainer">
     <ng-template #commonContacts></ng-template>
   </div>
 
-  <div class="preLoad loader loader-default " [class.is-active] = "isShowBusyIcon"></div>
+  <div class="preLoad loader loader-default " [class.is-active]="isShowBusyIcon"></div>
+
+  <ng-template #dialog></ng-template>
 </div>

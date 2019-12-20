@@ -23,23 +23,23 @@
         显示基站位置
     </button>
 
-    <div class="btnColorGroup">
-        <div class="btnColor" 
+    <div class="btnStyleGroup" [class.hide]="!isShowBtnStyle">
+        <div class="btnStyle" 
             *ngFor="let item of [1,2,3]" 
             [style.background-image]="getBtnColorIconUrl(item)"
             (click)="onClickBtnStyle(item)">
         </div>
-        <div class="btnColor imgClearStyle" (click)="onClearStyle()"></div>
+        <div class="btnStyle imgClearStyle" (click)="onClearStyle()"></div>
     </div>
 
-    <div #btnGroup class="btnFilterGroup" [class.hide]="!isShowBtnSave">
-        <div class="btnFilter" 
+    <div #btnGroup class="btnSaveGroup" [class.hide]="!isShowBtnSave">
+        <div class="btnSave" 
             *ngFor="let item of [1,2,3,4,5]" 
             [style.background-image]="getBtnSaveIconUrl(item)"
             (click)="onClickBtnSave(item)" 
             (dblclick)="onDoubleClickBtnSave(item)">
         </div>
-        <div class="btnFilter imgClearFilter" (click)="onClearFilter()"></div>
+        <div class="btnSave imgClearFilter" (click)="onClearFilter()"></div>
     </div>
 
     <div class="btnBack" [class.hide]="!isShowBtnBack" (click)="onClickBack()"></div>

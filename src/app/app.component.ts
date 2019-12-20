@@ -6,6 +6,8 @@ import { HttpClient } from '@angular/common/http';
 import * as EventBus from 'eventbusjs'
 import { EventType } from './models/event-type';
 import { CommonContactsComponent } from './common-contacts/common-contacts.component';
+import * as configData from '../assets/config.json';
+import { PositionComponent } from './position/position.component';
 
 @Component({
   selector: 'app-root',
@@ -28,16 +30,25 @@ export class AppComponent {
   /**是否显示忙碌图标,和class绑定*/
   isShowBusyIcon: boolean;
 
-  @ViewChild('commonContacts', { read: ViewContainerRef, static: false }) container: ViewContainerRef
+  /**是否显示对话框 */
+  isShowDialog:boolean;
+
+  @ViewChild('commonContacts', { read: ViewContainerRef, static: false }) commonContacts: ViewContainerRef
+  @ViewChild('dialog', { read: ViewContainerRef, static: false }) dialog: ViewContainerRef
 
   constructor(
     private sqlService: SqlService,
     private resolver: ComponentFactoryResolver,
     private http: HttpClient) {
+    Model.sqlUrl = configData.sqlUrl;
+    Model.isGetLocation = configData.isGetLocation;
+    console.log(Model.sqlUrl + Model.isGetLocation);
+    EventBus.addEventListener(EventType.IS_CAN_RESIZE_MIDDLE, e => { this.isCanResizeMiddle = e.target; })
     EventBus.addEventListener(EventType.IS_SHOW_BUSY_ICON, e => { this.isShowBusyIcon = e.target; })
     EventBus.addEventListener(EventType.OPEN_MIDDLE, e => { this.resetMiddle(e.target) });
     EventBus.addEventListener(EventType.CLOSE_LEFT, e => { this.closeLeft() });
     EventBus.addEventListener(EventType.SHOW_COMMON_CONTACTS_UI, e => { this.showCommonContactsUI(e.target) })
+    EventBus.addEventListener(EventType.SHOW_DIALOG, e => { this.showDialog(e.target) })
   }
 
   ngOnInit(): void {
@@ -49,6 +60,7 @@ export class AppComponent {
     Model.height = window.innerHeight;
     window.addEventListener('resize', e => {
       Model.height = (<Window>(e.target)).innerHeight;
+      Model.width = (<Window>(e.target)).innerWidth;
     })
   }
 
@@ -81,6 +93,7 @@ export class AppComponent {
     this.sqlService.selectContactInfo()
       .subscribe(
         res => {
+          console.log(res)
           if (res.length > 0) {
             for (let i = 0; i < res.length; i++) {
               const c = res[i];
@@ -129,7 +142,7 @@ export class AppComponent {
   }
 
   private maxMiddle() {
-    let w = this.isLeftOpen ? Model.width - 250 : Model.width;
+    let w = this.isLeftOpen ? Model.width - 260 : Model.width-4;
     gsap.to('#middleContainer', 0.5, { width: w });
     this.isMaxMiddle = true;
     this.isMinMiddle = false;
@@ -152,12 +165,25 @@ export class AppComponent {
   }
 
   private showCommonContactsUI(tables) {
-    this.container.clear();
+    this.commonContacts.clear();
     const factory: ComponentFactory<CommonContactsComponent> = this.resolver.resolveComponentFactory(CommonContactsComponent);
-    let componentRef = this.container.createComponent(factory);
+    let componentRef = this.commonContacts.createComponent(factory);
     componentRef.instance.tables = tables;
 
     gsap.to("#commonContactsContainer", 0.5, { left: "251px" })
   }
 
+  private showDialog(data){
+    console.log("show dialog")
+    const factory: ComponentFactory<PositionComponent> = this.resolver.resolveComponentFactory(PositionComponent);
+    let componentRef = this.dialog.createComponent(factory);
+    componentRef.instance.data = data;
+    componentRef.instance.itself = componentRef;
+
+    let element = <HTMLElement>componentRef.location.nativeElement;
+    element.style.position = "absolute";
+    element.style.width = '100%';
+    element.style.height = '100%';
+
+  }
 }

@@ -2,7 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatButtonModule, MatRadioModule, MatExpansionModule, MatInputModule, MatCheckboxModule, MatListModule, MatTooltipModule, TooltipComponent } from '@angular/material'
+import { MatButtonModule, MatRadioModule, MatExpansionModule, MatInputModule, MatCheckboxModule, MatListModule, MatTooltipModule, MatDialogModule } from '@angular/material'
 import { FormsModule } from '@angular/forms'
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
@@ -18,6 +18,7 @@ import { CommonContactsComponent } from './common-contacts/common-contacts.compo
 import { MapComponent } from './map/map.component'
 import { HelpComponent } from './help/help.component';
 import { OtherNumberTooltipComponent } from './other-number-tooltip/other-number-tooltip.component';
+import { PositionComponent } from './position/position.component';
 
 const appRoutes: Routes = [
   { path: '', component: MapComponent },
@@ -32,7 +33,8 @@ const appRoutes: Routes = [
     CommonContactsComponent,
     MapComponent,
     HelpComponent,
-    OtherNumberTooltipComponent
+    OtherNumberTooltipComponent,
+    PositionComponent,
   ],
   imports: [
     BrowserModule,
@@ -46,12 +48,13 @@ const appRoutes: Routes = [
     MatCheckboxModule,
     MatTooltipModule,
     MatListModule,
+    MatDialogModule,
     FormsModule,
     RouterModule.forRoot(appRoutes),
     AgGridModule.withComponents([OtherNumberFilterComponent,OtherNumberTooltipComponent]),
   ],
   providers: [{ provide: LocationStrategy, useClass: HashLocationStrategy }],
   bootstrap: [AppComponent],
-  entryComponents: [CommonContactsComponent]
+  entryComponents: [CommonContactsComponent,PositionComponent]
 })
 export class AppModule { }

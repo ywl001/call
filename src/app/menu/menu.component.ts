@@ -1,18 +1,17 @@
 import { ExcelService } from './../services/excel.service';
-import { EventType } from './../models/event-type';
-import { DbService } from './../services/db.service';
-import { Component, OnInit, ChangeDetectorRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
+import { MatAccordion } from '@angular/material';
 
 import * as toastr from 'toastr'
 import * as EventBus from 'eventbusjs'
+
+import { EventType } from './../models/event-type';
+import { DbService } from './../services/db.service';
 import { SqlService } from '../services/sql.service';
-import { Router, NavigationEnd } from '@angular/router';
-import { MatAccordion } from '@angular/material';
 import { Cdma } from '../models/cdma';
 import { Record } from '../models/record';
 import { Model } from '../models/model';
-import { Grid } from '@ag-grid-community/core';
-import { GridComponent } from '../grid/grid.component';
 
 
 /**第三方类的定义 */
@@ -28,7 +27,7 @@ declare var gcoord;
 export class MenuComponent implements OnInit {
 
   // 话单列表
-  tables:Array<any>;
+  tables: Array<any>;
 
   // 运营商类型
   choseType; // 和单选组绑定
@@ -49,7 +48,6 @@ export class MenuComponent implements OnInit {
     private dbService: DbService,
     private sqlService: SqlService,
     private excelService: ExcelService,
-    private changeDetectorRef: ChangeDetectorRef,
     private router: Router,
   ) {
     // 当数据库改动时，重新载入
@@ -80,11 +78,8 @@ export class MenuComponent implements OnInit {
   getTables() {
     this.dbService.getTables()
       .done(tables => {
-        this.tables = [];
-        this.tables = this.tables.concat(tables);
+        this.tables = tables;
         Model.tables = tables;
-        // setInterval(()=>{this.changeDetectorRef.detectChanges()},200)
-        // 触发视图更新
       });
   }
 
@@ -147,24 +142,21 @@ export class MenuComponent implements OnInit {
       )
   }
 
-  private cdmaData(data: any[][]) {
+  private cdmaData(data) {
     const len = data.length;
-    let fields = data[0];
-    fields.push(Model.LAC);
-    fields.push(Model.CI);
-    const cdmaCityIndex = fields.indexOf(Model.CDMA_CITY);
-    const cdmaCiIndex = fields.indexOf(Model.CDMA_CI);
-    for (let i = 1; i < len; i++) {
-      let cityName: string = data[i][cdmaCityIndex];
-      if (cityName) {
-        cityName = cityName.replace('市', '');
+    for (let i = 0; i < len; i++) {
+      let r = data[i];
+      if (!r.hasOwnProperty(Model.CDMA_CITY)) {
+        toastr.error('cdma 话单没有通话地');
+        return;
+      } else {
+        let cityName: string = r[Model.CDMA_CITY];
+        if (cityName) {
+          cityName = cityName.replace('市', '');
+        }
+        const sid = Cdma.CITY_SID_MAP.get(cityName);
+        r[Model.LAC] = sid;
       }
-      //sid充当lac列
-      const sid = Cdma.CITY_SID_MAP.get(cityName);
-      //城市翻译出来的编号
-      data[i].push(sid);
-      //蜂窝号
-      data[i].push(data[i][cdmaCiIndex]);
     }
     return data;
   }
@@ -172,8 +164,8 @@ export class MenuComponent implements OnInit {
   private set excelData(data) {
     console.time("clean data")
     this.records = this.cleanExcelData(data);
-    if (!this.validate(this.records))
-      return;
+    // if (!this.validate(this.records))
+    //   return;
     console.timeEnd("clean data");
 
     //数据处理完成，开始创建表
@@ -429,8 +421,8 @@ export class MenuComponent implements OnInit {
       console.log(lng);
       if (record.lng == 0 || record.lat == 0)
         continue;
+     
       //+号将字符串类型转换未number
-
       let arr = gcoord.transform(
         [+record.lng, +record.lat],
         gcoord.WGS84,               // 当前坐标系
@@ -547,7 +539,7 @@ export class MenuComponent implements OnInit {
   onShowRecords(tableName) {
     Model.isShowBtnBack = false;
     // console.log(Model.allRecords);
-    EventBus.dispatch(EventType.SHOW_RECORDS, {data:Model.allRecords,state:Model.RECORDS_STATE});
+    EventBus.dispatch(EventType.SHOW_RECORDS, { data: Model.allRecords, state: Model.RECORDS_STATE });
   }
 
   //获取话单的次数统计
@@ -555,7 +547,7 @@ export class MenuComponent implements OnInit {
     Model.isShowBtnBack = true;
     this.dbService.getRecordCountInfo(tableName)
       .done(res => {
-        EventBus.dispatch(EventType.SHOW_RECORDS, {data:res,state:Model.RECORD_COUNT_STATE});
+        EventBus.dispatch(EventType.SHOW_RECORDS, { data: res, state: Model.RECORD_COUNT_STATE });
       })
       .fail((tx, err) => { throw new Error(err.message) })
   }
@@ -577,7 +569,7 @@ export class MenuComponent implements OnInit {
       }
     }
     if (nightRecords.length > 0)
-      EventBus.dispatch(EventType.SHOW_RECORDS, {data:nightRecords,state:Model.RECORDS_STATE});
+      EventBus.dispatch(EventType.SHOW_RECORDS, { data: nightRecords, state: Model.RECORDS_STATE });
     else
       toastr.error('没有夜间通话记录,请检查起始时间');
   }
@@ -588,7 +580,7 @@ export class MenuComponent implements OnInit {
       .done(res => {
         let stations = Record.toStations(res);
         EventBus.dispatch(EventType.SHOW_STATIONS, stations);
-        EventBus.dispatch(EventType.SHOW_RECORDS, {data:res,state:Model.RECORDS_STATE});
+        EventBus.dispatch(EventType.SHOW_RECORDS, { data: res, state: Model.RECORDS_STATE });
       })
       .fail((tx, err) => { throw new Error(err.message) });
   }
@@ -625,7 +617,7 @@ export class MenuComponent implements OnInit {
     this.accordion.closeAll();
     this.accordion.multi = false;
 
-    EventBus.dispatch(EventType.SHOW_COMMON_CONTACTS_UI,this.tables);
+    EventBus.dispatch(EventType.SHOW_COMMON_CONTACTS_UI, this.tables);
     // Model.record_count_info = null;
   }
 

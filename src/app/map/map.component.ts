@@ -5,12 +5,14 @@ import * as toastr from 'toastr';
 import { EventType } from '../models/event-type';
 import { Station } from '../models/station';
 import { Record } from '../models/record';
+import { Router, NavigationEnd } from '@angular/router';
 
 declare var BMap;
 declare var BMapLib;
 declare var BMAP_DRAWING_CIRCLE;
 declare var BMAP_DRAWING_POLYGON;
 declare var BMAP_DRAWING_RECTANGLE;
+declare var BMAP_STATUS_SUCCESS;
 
 @Component({
   selector: 'app-map',
@@ -31,7 +33,9 @@ export class MapComponent implements OnInit {
 
   private focusIndex = 1000000;
 
-  private isBatch;
+  /**是否批量显示基站 */
+  private isBatchDisplay;
+
   private countStation;
 
   private prevMark;
@@ -47,11 +51,17 @@ export class MapComponent implements OnInit {
 
   private stations: Array<Station>;
 
-  constructor() {
+  private isPickMap = false;
+
+  private defaultCursor;
+
+  constructor(private router: Router) {
     this.mapPoints = [];
+    this.stations = [];
     EventBus.addEventListener(EventType.SHOW_STATION, e => { this.showLocation(e.target) });
     EventBus.addEventListener(EventType.SHOW_STATIONS, e => { this.ShowLocations(e.target) });
     EventBus.addEventListener(EventType.CLEAR_MARKER, e => { this.clearMark() });
+    EventBus.addEventListener(EventType.PICK_MAP,e=>{this.pickMap(e.target)})
   }
 
   ngOnInit() {
@@ -66,7 +76,9 @@ export class MapComponent implements OnInit {
     this.bdmap.centerAndZoom('洛阳', 11);
     this.bdmap.enableScrollWheelZoom(true);
     this.bdmap.disableDoubleClickZoom(false);
-    this.bdmap.addEventListener('addoverlay', e => { this.onAddOverlay(); })
+    this.bdmap.addEventListener('addoverlay', e => { this.onAddOverlay(); });
+    this.bdmap.addEventListener('click',e=>{this.onMapClick(e)});
+    this.defaultCursor = this.bdmap.getDefaultCursor()
   }
 
   //初始化绘图工具条
@@ -110,26 +122,41 @@ export class MapComponent implements OnInit {
     (<any>window).addResizeListener(mapDiv, e => {
       this.onResized({ newWidth: mapDiv.clientWidth })
     });
-    this.getCurrentLocation();
+
+    if(Model.isGetLocation)
+      this.getCurrentLocation();
   }
 
   //定位
   private getCurrentLocation() {
-    // let geolocation = new BMap.Geolocation();
-    // geolocation.getCurrentPosition((r) => {
-    //   if (geolocation.getStatus() == BMAP_STATUS_SUCCESS) {
-    //     this.bdmap.centerAndZoom(r.point, 13)
-    //   }
-    //   else {
-    //     this.bdmap.centerAndZoom('洛阳', 11);
-    //   }
-    // });
+    let geolocation = new BMap.Geolocation();
+    geolocation.getCurrentPosition((r) => {
+      if (geolocation.getStatus() == BMAP_STATUS_SUCCESS) {
+        this.bdmap.centerAndZoom(r.point, 13)
+      }
+      else {
+        this.bdmap.centerAndZoom('洛阳', 11);
+      }
+    });
 
-    // var myCity = new BMap.LocalCity();
-    // myCity.get((r)=>{
-    //   var cityName = r.name;
-    //   this.bdmap.setCenter(cityName,13);
-    // }); 
+    var myCity = new BMap.LocalCity();
+    myCity.get((r)=>{
+      var cityName = r.name;
+      this.bdmap.setCenter(cityName,13);
+    }); 
+  }
+
+  private pickMap(data){
+    //最大化地图
+    EventBus.dispatch(EventType.CLOSE_LEFT);
+    EventBus.dispatch(EventType.OPEN_MIDDLE,0);
+    //设置光标为十字光标
+    this.bdmap.setDefaultCursor('crosshair');
+
+    //监听鼠标右键，取消
+    this.bdmap.addEventListener('rightclick',e=>{this.onRightClick()})
+
+    this.isPickMap = true;
   }
 
   ///////////////////////////////////////////显示基站位置//////////////////////////////////////////////////////
@@ -138,10 +165,11 @@ export class MapComponent implements OnInit {
   private showLocation(value: Station) {
     if (!value) return;
 
-    if (this.isBatch) {
+    if (this.isBatchDisplay) {
       this.clearMark();
-      this.isBatch = false;
+      this.isBatchDisplay = false;
     }
+
     this.stations.push(value);
     EventBus.dispatch(EventType.OPEN_RIGHT);
     let m = this.createMark(value, true);
@@ -159,7 +187,7 @@ export class MapComponent implements OnInit {
     this.bdmap.addOverlay(marker);
     this.zIndex++;
 
-    if (!this.isBatch) {
+    if (!this.isBatchDisplay) {
       this.setMapCenter(this.mapPoints);
     }
     this.prevMark = marker;
@@ -169,7 +197,7 @@ export class MapComponent implements OnInit {
   private ShowLocations(value: Array<Station>) {
     if (!value) return;
     this.countStation = value.length;
-    this.isBatch = true;
+    this.isBatchDisplay = true;
     this.clearMark();
     this.stations = value;
     EventBus.dispatch(EventType.OPEN_RIGHT);
@@ -277,7 +305,7 @@ export class MapComponent implements OnInit {
 
   /**判断多基站添加完毕侯，移除忙碌图标，设置地图中心 */
   private onAddOverlay() {
-    if (!this.isBatch)
+    if (!this.isBatchDisplay)
       return;
     this.overlayIndex++;
     if (this.overlayIndex == this.countStation) {
@@ -320,7 +348,7 @@ export class MapComponent implements OnInit {
       this.ShowLocations(stations);
     }
     EventBus.dispatch(EventType.OPEN_MIDDLE, 1)
-    EventBus.dispatch(EventType.SHOW_RECORDS, {data:records,state:Model.RECORDS_STATE});
+    EventBus.dispatch(EventType.SHOW_RECORDS, { data: records, state: Model.RECORDS_STATE });
   }
 
   //检测绘制范围内是否有覆盖物
@@ -364,10 +392,10 @@ export class MapComponent implements OnInit {
   private onMarkerDoubleClick(e) {
     let station: Station = e.target.attributes;
     let records = this.getRecordsByStations([station]);
-    EventBus.dispatch(EventType.SHOW_RECORDS, {data:records,state:Model.RECORDS_STATE});
+    EventBus.dispatch(EventType.SHOW_RECORDS, { data: records, state: Model.RECORDS_STATE });
   }
 
-  private getRecordsByStations(stations){
+  private getRecordsByStations(stations) {
     let records = [];
     let ids = [];
     for (let i = 0; i < stations.length; i++) {
@@ -422,12 +450,29 @@ export class MapComponent implements OnInit {
   //地图空白区域单击，隐藏上下两个工具
   onMapClick(e) {
     let mouseEvent: MouseEvent = e;
-    console.log('Model.width:'+Model.width)
+    console.log('Model.width:' + Model.width)
     if ((mouseEvent.clientX > Model.width / 2 - 50 || mouseEvent.clientX < Model.width / 2 - 50) && mouseEvent.clientY < 50) {
       this.drawingManager._drawingTool.show();
     } else {
       this.drawingManager._drawingTool.hide();
     }
+
+    if(this.isPickMap){
+      console.log(e.point.lat + "--" + e.point.lng);
+      this.isPickMap = false;
+      let data:any={};
+      data.lat = e.point.lat;
+      data.lng = e.point.lng;
+      EventBus.dispatch(EventType.PICK_MAP_COMPLETE,data);
+      this.bdmap.setDefaultCursor(this.defaultCursor);
+    }
+  }
+
+  onRightClick(){
+    this.bdmap.removeEventListener('rightclick',this.onRightClick)
+    EventBus.dispatch(EventType.OPEN_MIDDLE,1);
+    this.isPickMap = false;
+    this.bdmap.setDefaultCursor(this.defaultCursor);
   }
 
   //地图尺寸改变时设置工具条位置

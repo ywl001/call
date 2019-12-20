@@ -71,3 +71,10 @@
     height: 100%;
 }
 
+#dialogContainer{
+    position: absolute;
+    width:100%;
+    height: 100%;
+    display: none;
+}
+

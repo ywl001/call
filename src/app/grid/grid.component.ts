@@ -15,6 +15,8 @@ import { ColumnApi, GridApi, CellEvent, CellValueChangedEvent, Module } from '@a
 import { LocalStorgeService } from '../services/local-storge.service';
 import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model';
 import { OtherNumberTooltipComponent } from '../other-number-tooltip/other-number-tooltip.component';
+import { PositionComponent } from '../position/position.component';
+import { MatDialog } from '@angular/material';
 
 @Component({
   selector: 'app-grid',
@@ -37,11 +39,16 @@ export class GridComponent {
   /**是否显示存储显示内容的按钮 class绑定*/
   isShowBtnSave;
 
-  searchValue;
+  /**是否显示几个设置行样式的按钮 */
+  isShowBtnStyle
 
   private columnApi: ColumnApi;
   private gridApi: GridApi;
+
+  //存储话单统计的数据
   private recordsCountList;
+
+  /**存储共同联系人数据，数据返回使用*/
   private commonContactsList
 
   //表格数据,rowdata绑定
@@ -50,15 +57,14 @@ export class GridComponent {
   columnDefs;
   /**组件绑定 */
   frameworkComponents;
-
+  /**国际化字符绑定 */
   localeText;
 
   //** 单击，双击的判断 */
   private isClick;
 
-  /** 作为编辑后修改相同网格后，防止递归的一种标志 */
+  /**是否处于编辑状态，编辑状态时，点击不能使用 */
   private isEdit;
-
 
   modules: Module[] = [ClientSideRowModelModule];
 
@@ -66,7 +72,9 @@ export class GridComponent {
     private dbService: DbService,
     private localStorgeService: LocalStorgeService,
     private changeRef: ChangeDetectorRef,
-    private sqlService: SqlService) {
+    private sqlService: SqlService,
+    private positionDialog: MatDialog
+  ) {
 
     this.frameworkComponents = {
       myFilter: OtherNumberFilterComponent,
@@ -84,6 +92,8 @@ export class GridComponent {
       applyFilter: '过滤完成',
       equals: '等于',
       notEqual: '不等于',
+      andCondition: '并且',
+      orCondition: '或者',
     }
 
     EventBus.addEventListener(EventType.SHOW_RECORDS, e => { this.showRecords(e.target) });
@@ -94,7 +104,7 @@ export class GridComponent {
     console.log('on grid ready')
     this.columnApi = params.columnApi;
     this.gridApi = params.api;
-    //设置tooltip的显示时间
+    //设置ag-grid控件tooltip的显示时间
     try {
       (params.api as any).context.beanWrappers.tooltipManager.beanInstance.MOUSEOVER_SHOW_TOOLTIP_TIMEOUT = 0.5;
     } catch (e) {
@@ -109,7 +119,7 @@ export class GridComponent {
     this._state = value;
 
     if (value == Model.RECORDS_STATE) {
-      this.setBtnVisible(Model.isShowBtnBack, true, true)
+      this.setBtnVisible(Model.isShowBtnBack, true, true, true)
       this.setRowStyle("record");
       EventBus.dispatch(EventType.OPEN_MIDDLE, 550);
     } else if (value == Model.RECORD_COUNT_STATE) {
@@ -121,7 +131,7 @@ export class GridComponent {
       this.setRowStyle("none");
       EventBus.dispatch(EventType.OPEN_MIDDLE, 450);
     } else if (value == Model.RECORDS_COMMON_CONTACTS_STATE) {
-      this.setBtnVisible(true, false, false);
+      this.setBtnVisible(true, false, false, false);
       this.setRowStyle("contactRecord");
       EventBus.dispatch(EventType.OPEN_MIDDLE, 1);
     }
@@ -134,6 +144,7 @@ export class GridComponent {
 
   /** 显示数据 */
   private showRecords(data) {
+    this.onClearFilter();
     this.state = data.state;
     let records = data.data;
 
@@ -147,14 +158,14 @@ export class GridComponent {
     this.gridData = records;
 
     this.changeRef.detectChanges();
-    console.timeEnd('get records by number')
   }
 
   /** 设置几个按钮是否显示 1、返回按钮 2、基站按钮 3、过滤按钮*/
-  private setBtnVisible(isShowBtnBack = false, isShowBtnLocation = false, isShowBtnSave = false) {
+  private setBtnVisible(isShowBtnBack = false, isShowBtnLocation = false, isShowBtnSave = false, isShowBtnStyle = false) {
     this.isShowBtnBack = isShowBtnBack;
     this.isShowBtnLocation = isShowBtnLocation;
     this.isShowBtnSave = isShowBtnSave;
+    this.isShowBtnStyle = isShowBtnStyle;
   }
 
   /**设置行风格， none\record*/
@@ -202,10 +213,10 @@ export class GridComponent {
         this.agGrid.gridOptions.getRowStyle = (params) => {
           let color;
           let background;
-          // if (params.data.lat == 0 || params.data.lng == 0) {
-          //   color = '#aaaaaa';
-          //   background = '#eeeeee';
-          // }
+          if (params.data.lat == 0 || params.data.lng == 0) {
+            color = '#888888';
+            background = '#eeeeee';
+          }
           let key = Model.currentTable + '_' + params.data.id;
           let value = this.localStorgeService.get(key);
           switch (value) {
@@ -323,14 +334,17 @@ export class GridComponent {
   onClickConfirm(e: CellEvent) {
     this.isClick = true;
     //发送事件，禁止中间容器缩放
-    if (e.colDef.headerName == Model.OTHER_NUMBER_CN) {
-      EventBus.dispatch(EventType.IS_TOGGLE_MIDDLE, false);
+    if ((e.colDef.headerName == Model.OTHER_NUMBER_CN) ||//对端号码时
+      ((e.colDef.headerName == Model.LAC_CN || e.colDef.headerName == Model.CI_CN)
+        && (e.data.lat == 0 || e.data.lng == 0)))//基站代码或小区号 并且 位置不存在时
+    {
+      EventBus.dispatch(EventType.IS_CAN_RESIZE_MIDDLE, false);
     }
 
     setTimeout(() => {
       if (this.isClick) {
         if (e.colDef.headerName == Model.OTHER_NUMBER_CN) {
-          EventBus.dispatch(EventType.IS_TOGGLE_MIDDLE, true);
+          EventBus.dispatch(EventType.IS_CAN_RESIZE_MIDDLE, true);
         }
         //单击单元格逻辑
         this.onClickCell(e);
@@ -340,10 +354,9 @@ export class GridComponent {
 
   //单击表中内容，显示基站位置或显示号码通话记录（统计表）
   private onClickCell(e: CellEvent) {
-    // EventBus.dispatch(EventType.IS_TOGGLE_MIDDLE, true);
-    if (this.isEdit) {
+    //处于编辑状态时，不做相应
+    if (this.isEdit)
       return;
-    }
     //通话记录表，单击显示基站位置
     if (this.state == Model.RECORDS_STATE || this.state == Model.RECORDS_COMMON_CONTACTS_STATE) {
       const rowData = e.data;
@@ -361,7 +374,6 @@ export class GridComponent {
       console.log("显示该号码");
       const rowData = e.data;
       const num = rowData[Model.OTHER_NUMBER];
-      console.time('get records by number')
       let data = this.getRecordsByNumber(num);
 
       this.showRecords({ data: data, state: Model.RECORDS_STATE })
@@ -372,7 +384,6 @@ export class GridComponent {
       let tables = e.data[Model.TABLE_NAME].split(' | ')
       this.dbService.getRecordsByNumberAndTable(otherNumber, tables)
         .done(res => {
-          // this.showCommonContactsRecords(res)
           this.showRecords({ data: res, state: Model.RECORDS_COMMON_CONTACTS_STATE })
         })
     }
@@ -394,42 +405,50 @@ export class GridComponent {
   onDoubleClick(e: CellEvent) {
     //避免双击造成触发单击事件
     this.isClick = false;
-    //是否手动修改的标志
-    this.isEdit = true;
     console.log('db click')
+
+    //设置未知基站位置
+    if ((e.colDef.headerName == Model.LAC_CN || e.colDef.headerName == Model.CI_CN)
+      && (e.data.lat == 0 || e.data.lng == 0)) {
+      console.log('双击没有位置')
+      if (Model.isDialogClosed) {
+        // this.positionDialog.open(PositionComponent, { data: { lac: e.data.lac, ci: e.data.ci, gridData: this.gridData } })
+        EventBus.dispatch(EventType.SHOW_DIALOG,{ lac: e.data.lac, ci: e.data.ci, gridData: this.gridData })
+        Model.isDialogClosed = false;
+      }
+    } else if (e.colDef.headerName == Model.OTHER_NUMBER_CN) {
+      console.log("edit true")
+      this.isEdit = true;
+    }
     //当双击对端号码时，关闭页面的缩放
-    EventBus.dispatch(EventType.IS_TOGGLE_MIDDLE, true);
+    EventBus.dispatch(EventType.IS_CAN_RESIZE_MIDDLE, true);
   }
 
   //当修改单元格内容后
   onCellValueChange(e: CellValueChangedEvent) {
-    //设置手动修改标志，避免因刷新数据造成递归
-    if (!this.isEdit)
-      return;
     console.log('cell value change');
+    if(!this.isEdit)
+      return;
+    this.isEdit = false;
     const otherNumber = e.data[Model.OTHER_NUMBER];
     //空白号码的处理，不能做修改
     if (otherNumber == '') {
       toastr.warning('请勿修改空白号码');
       e.node.setDataValue(Model.OTHER_NUMBER_CN, e.oldValue);
-      this.isEdit = false;
       return;
     }
     this.sqlService.insertOrUpdateContects(e.data[Model.OTHER_NUMBER], e.newValue)
       .subscribe(
         res => {
           if (res) {
-            this.isEdit = false;
-            //刷新本地数据
-            Model.Contacts.set(e.data[Model.OTHER_NUMBER], e.newValue);
-            this.showRecords({ data: this.gridData, state: Model.RECORDS_STATE });
+            Model.Contacts.set(e.data[Model.OTHER_NUMBER], { name: e.newValue, insertTime: new Date().toLocaleDateString() });
+            this.showRecords({ data: this.gridData, state: this.state });
           } else {
             toastr.warning('修改失败，请将对端号码转为文本格式后重新导入');
           }
         }
       )
   }
-
 
   /** 单击按钮显示表中的基站位置*/
   onShowLocations(e) {
@@ -473,17 +492,19 @@ export class GridComponent {
     return res;
   }
 
+  /**单击存储当前数据按钮 */
   onClickBtnSave(index) {
     this.isClick = true;
-    EventBus.dispatch(EventType.IS_TOGGLE_MIDDLE, false);
+    EventBus.dispatch(EventType.IS_CAN_RESIZE_MIDDLE, false);
     setTimeout(() => {
       if (this.isClick) {
-        EventBus.dispatch(EventType.IS_TOGGLE_MIDDLE, true);
+        EventBus.dispatch(EventType.IS_CAN_RESIZE_MIDDLE, true);
         //根据索引判断是否有存储，如果有，使用存储的，没有则设置
         let key = this.getSaveKey(index)
         let ids = this.localStorgeService.getObject(key);
         let arr = Object.keys(ids)
         if (arr.length > 0) {
+          this.onClearFilter()
           let records = this.idsToRecords(ids);
           this.gridData = records;
         } else {
@@ -509,7 +530,7 @@ export class GridComponent {
     return records;
   }
 
-  //双击按钮清除存储数据
+  /**双击按钮清除存储数据*/
   onDoubleClickBtnSave(index) {
     this.isClick = false;
     //删除存储的过滤器
@@ -517,18 +538,27 @@ export class GridComponent {
     localStorage.removeItem(key)//删除磁盘保存的
 
     setTimeout(() => {
-      EventBus.dispatch(EventType.IS_TOGGLE_MIDDLE, true);
+      EventBus.dispatch(EventType.IS_CAN_RESIZE_MIDDLE, true);
     }, 500);
     console.log('db click');
   }
 
-  //存储当前显示数据
+  //存储当前表格的显示数据
   private saveDisplayData(key) {
     let ids = [];
-    let count = this.gridApi.getDisplayedRowCount();
-    for (let i = 0; i < count; i++) {
-      ids.push(this.gridApi.getDisplayedRowAtIndex(i).id)
+    let selectedRows = this.gridApi.getSelectedRows();
+    //不是单选的情况下，存储选中数据
+    if (selectedRows.length > 1) {
+      for (let i = 0; i < selectedRows.length; i++) {
+        ids.push(selectedRows[i].id);
+      }
+    } else {
+      let count = this.gridApi.getDisplayedRowCount();
+      for (let i = 0; i < count; i++) {
+        ids.push(this.gridApi.getDisplayedRowAtIndex(i).data.id)
+      }
     }
+
     this.localStorgeService.setObject(key, ids);
   }
 
@@ -548,10 +578,12 @@ export class GridComponent {
     return `url(assets/f${index}.png)`;
   }
 
+  /**设置样式按钮的背景图案 */
   getBtnColorIconUrl(index) {
     return `url(assets/c${index}.png)`;
   }
 
+  /**设置选择行的样式 */
   onClickBtnStyle(index) {
     let selectRows = this.gridApi.getSelectedRows();
     for (let i = 0; i < selectRows.length; i++) {
@@ -562,6 +594,7 @@ export class GridComponent {
     this.gridApi.redrawRows();
   }
 
+  /**清除选择行的样式 */
   onClearStyle() {
     let selectRows = this.gridApi.getSelectedRows();
     for (let i = 0; i < selectRows.length; i++) {

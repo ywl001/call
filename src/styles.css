@@ -3,20 +3,19 @@
 @import "~@ag-grid-community/all-modules/dist/styles/ag-theme-balham.css";
 
 /*设置鼠标在ag-grid行上面时，突出显示的背景颜色*/
-/* .ag-row-hover {
-    background-color: #dfdfff !important;
-} */
+.ag-row-hover {
+    background-color:lightcyan !important;
+}
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 /* 去除百度地图logo */
-
 .anchorBL {
     display: none;
 }
 
-.ag-theme-balham .noLocation {
+/* .ag-theme-balham .noLocation {
     background-color: #Eeeeee;
     color: #aaaaaa;
 }
@@ -35,4 +34,4 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .ag-theme-balham .row4 {
     background-color: lightskyblue;
-}
+} */

@@ -57,6 +57,23 @@ export class DbService {
     return this.db.query(sql, tableData);
 
   }
+
+  /**
+   * 添加基站的经纬度
+   * @param tableName 表名
+   * @param lac 基站号
+   * @param ci 小区号
+   * @param lat 纬度
+   * @param lng 经度
+   * @param callback 回调
+   */
+  updateLatLng(tableName: string, lac,ci,lat,lng,callback, fail = null){
+    const sql = `update ${tableName} set lat = '${lat}',lng = '${lng}' where lac = '${lac}' and ci='${ci}'`;
+    console.log(sql)
+    this.db.rawTx(tx => {
+      tx.executeSql(sql, [], callback, fail);
+    })
+  }
   /**
    * 获取所有话单
    */

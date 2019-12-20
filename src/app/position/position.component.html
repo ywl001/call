@@ -1,0 +1,32 @@
+<div class="root">
+    <div class="background"></div>
+    <div class="content">
+        <h1 mat-dialog-title>设置基站位置({{data.lac}}--{{data.ci}})</h1>
+
+        <div mat-dialog-content class="contentContainer">
+            <div class="inputContainer">
+                <mat-form-field class="input">
+                    <input matInput [(ngModel)]="lng" placeholder="输入经度">
+                </mat-form-field>
+                <mat-form-field class="input">
+                    <input matInput [(ngModel)]="lat" placeholder="输入纬度">
+                </mat-form-field>
+            </div>
+
+            <mat-radio-group class="radioGroup" [selected]="choseType" [(ngModel)]="coordType">
+                坐标系类型：
+                <mat-radio-button class="radio" value="bd09" checked>百度</mat-radio-button>
+                <mat-radio-button class="radio" value='gjc02'>高德</mat-radio-button>
+                <mat-radio-button class="radio" value='wgs84'>GPS</mat-radio-button>
+            </mat-radio-group>
+
+        </div>
+
+        <div class="btnContainer">
+            <button mat-button (click)="onCancel()">取消</button>
+            <button mat-button cdkFocusInitial (click)="onSubmit()">确定</button>
+            <div class="btnLocation" title="从地图选择" (click)="onPickFromMap()"></div>
+        </div>
+    </div>
+
+</div>

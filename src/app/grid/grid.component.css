@@ -15,7 +15,7 @@
     opacity:1;
 }
 
-.btnColorGroup{
+.btnStyleGroup{
     display: flex;
     flex-direction: column;
     position: absolute;
@@ -27,7 +27,7 @@
 
 
 
-.btnColor{
+.btnStyle{
     width:35px;
     height: 35px;
     background-size: cover;
@@ -36,7 +36,7 @@
     background-color: blanchedalmond;
 }
 
-.btnColor:hover{
+.btnStyle:hover{
     opacity: 1;
 }
 
@@ -44,26 +44,27 @@
     background-image: url('../../assets/clear_style.png'); 
 }
 
-.btnFilterGroup{
+.btnSaveGroup{
     display: flex;
     flex-direction: column;
     position: absolute;
     right: 20px;
     bottom: 60px;
-    opacity: 0.5;
+
     /* background-color: aquamarine */
 }
 
-.btnFilterGroup:hover{
-    opacity: 1;
-}
-
-.btnFilter{
+.btnSave{
     width:35px;
     height: 35px;
     background-size: cover;
     margin-bottom: 2px;
     background-color: blanchedalmond;
+    opacity: 0.5;
+}
+
+.btnSave:hover{
+    opacity: 1;
 }
 
 .imgClearFilter{
