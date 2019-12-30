@@ -576,6 +576,7 @@ export class MenuComponent implements OnInit {
 
   //基站前十名
   onTopTenStations(tableName) {
+    Model.isShowBtnBack = false;
     this.dbService.getTopTenStations(tableName)
       .done(res => {
         let stations = Record.toStations(res);

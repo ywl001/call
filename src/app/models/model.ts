@@ -141,4 +141,6 @@ export class Model {
 
     public static isDialogClosed = true;
 
+    public static labelType;
+
 }

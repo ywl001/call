@@ -7,7 +7,7 @@ import * as EventBus from 'eventbusjs'
 import { EventType } from './models/event-type';
 import { CommonContactsComponent } from './common-contacts/common-contacts.component';
 import * as configData from '../assets/config.json';
-import { PositionComponent } from './position/position.component';
+import { LocationDialogComponent } from './location-dialog/location-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -42,6 +42,7 @@ export class AppComponent {
     private http: HttpClient) {
     Model.sqlUrl = configData.sqlUrl;
     Model.isGetLocation = configData.isGetLocation;
+    Model.labelType = configData.labelType;
     console.log(Model.sqlUrl + Model.isGetLocation);
     EventBus.addEventListener(EventType.IS_CAN_RESIZE_MIDDLE, e => { this.isCanResizeMiddle = e.target; })
     EventBus.addEventListener(EventType.IS_SHOW_BUSY_ICON, e => { this.isShowBusyIcon = e.target; })
@@ -169,13 +170,17 @@ export class AppComponent {
     const factory: ComponentFactory<CommonContactsComponent> = this.resolver.resolveComponentFactory(CommonContactsComponent);
     let componentRef = this.commonContacts.createComponent(factory);
     componentRef.instance.tables = tables;
+    componentRef.instance.itself = componentRef;
 
-    gsap.to("#commonContactsContainer", 0.5, { left: "251px" })
+    let element = <HTMLElement>componentRef.location.nativeElement;
+    element.style.position = 'absolute';
+    element.style.top = '100px'
+    gsap.to(element,{left:262,width:300})
   }
 
   private showDialog(data){
     console.log("show dialog")
-    const factory: ComponentFactory<PositionComponent> = this.resolver.resolveComponentFactory(PositionComponent);
+    const factory: ComponentFactory<LocationDialogComponent> = this.resolver.resolveComponentFactory(LocationDialogComponent);
     let componentRef = this.dialog.createComponent(factory);
     componentRef.instance.data = data;
     componentRef.instance.itself = componentRef;
@@ -184,6 +189,6 @@ export class AppComponent {
     element.style.position = "absolute";
     element.style.width = '100%';
     element.style.height = '100%';
-
+    gsap.from(element,{opacity:0,top:'50%',left:'50%',width:0,height:0});
   }
 }

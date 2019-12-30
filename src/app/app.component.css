@@ -49,14 +49,7 @@
     background-image: url('../assets/open.png');
 }
 
-#commonContactsContainer{
-    left: -350px;
-    position: absolute;
-    top: 100px;
-    z-index: 10000;
-    background-color: blueviolet;
-    width: 300px;
-}
+
 
 .preLoad{
     /* position: absolute;

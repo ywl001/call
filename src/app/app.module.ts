@@ -18,7 +18,7 @@ import { CommonContactsComponent } from './common-contacts/common-contacts.compo
 import { MapComponent } from './map/map.component'
 import { HelpComponent } from './help/help.component';
 import { OtherNumberTooltipComponent } from './other-number-tooltip/other-number-tooltip.component';
-import { PositionComponent } from './position/position.component';
+import { LocationDialogComponent } from './location-dialog/location-dialog.component';
 
 const appRoutes: Routes = [
   { path: '', component: MapComponent },
@@ -34,7 +34,7 @@ const appRoutes: Routes = [
     MapComponent,
     HelpComponent,
     OtherNumberTooltipComponent,
-    PositionComponent,
+    LocationDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -55,6 +55,6 @@ const appRoutes: Routes = [
   ],
   providers: [{ provide: LocationStrategy, useClass: HashLocationStrategy }],
   bootstrap: [AppComponent],
-  entryComponents: [CommonContactsComponent,PositionComponent]
+  entryComponents: [CommonContactsComponent,LocationDialogComponent]
 })
 export class AppModule { }

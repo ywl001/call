@@ -15,7 +15,6 @@ import { ColumnApi, GridApi, CellEvent, CellValueChangedEvent, Module } from '@a
 import { LocalStorgeService } from '../services/local-storge.service';
 import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model';
 import { OtherNumberTooltipComponent } from '../other-number-tooltip/other-number-tooltip.component';
-import { PositionComponent } from '../position/position.component';
 import { MatDialog } from '@angular/material';
 
 @Component({
@@ -409,7 +408,8 @@ export class GridComponent {
 
     //设置未知基站位置
     if ((e.colDef.headerName == Model.LAC_CN || e.colDef.headerName == Model.CI_CN)
-      && (e.data.lat == 0 || e.data.lng == 0)) {
+      && (e.data.lat == 0 || e.data.lng == 0) 
+      && (e.data.lac !='' || e.data.ci !='')) {
       console.log('双击没有位置')
       if (Model.isDialogClosed) {
         // this.positionDialog.open(PositionComponent, { data: { lac: e.data.lac, ci: e.data.ci, gridData: this.gridData } })
@@ -437,6 +437,8 @@ export class GridComponent {
       e.node.setDataValue(Model.OTHER_NUMBER_CN, e.oldValue);
       return;
     }
+    if(e.newValue == e.oldValue)
+      return;
     this.sqlService.insertOrUpdateContects(e.data[Model.OTHER_NUMBER], e.newValue)
       .subscribe(
         res => {

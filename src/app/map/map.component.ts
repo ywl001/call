@@ -5,7 +5,7 @@ import * as toastr from 'toastr';
 import { EventType } from '../models/event-type';
 import { Station } from '../models/station';
 import { Record } from '../models/record';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router } from '@angular/router';
 
 declare var BMap;
 declare var BMapLib;
@@ -61,7 +61,7 @@ export class MapComponent implements OnInit {
     EventBus.addEventListener(EventType.SHOW_STATION, e => { this.showLocation(e.target) });
     EventBus.addEventListener(EventType.SHOW_STATIONS, e => { this.ShowLocations(e.target) });
     EventBus.addEventListener(EventType.CLEAR_MARKER, e => { this.clearMark() });
-    EventBus.addEventListener(EventType.PICK_MAP,e=>{this.pickMap(e.target)})
+    EventBus.addEventListener(EventType.PICK_MAP, e => { this.pickMap() })
   }
 
   ngOnInit() {
@@ -77,7 +77,7 @@ export class MapComponent implements OnInit {
     this.bdmap.enableScrollWheelZoom(true);
     this.bdmap.disableDoubleClickZoom(false);
     this.bdmap.addEventListener('addoverlay', e => { this.onAddOverlay(); });
-    this.bdmap.addEventListener('click',e=>{this.onMapClick(e)});
+    this.bdmap.addEventListener('click', e => { this.onMapClick(e) });
     this.defaultCursor = this.bdmap.getDefaultCursor()
   }
 
@@ -123,7 +123,7 @@ export class MapComponent implements OnInit {
       this.onResized({ newWidth: mapDiv.clientWidth })
     });
 
-    if(Model.isGetLocation)
+    if (Model.isGetLocation)
       this.getCurrentLocation();
   }
 
@@ -140,21 +140,21 @@ export class MapComponent implements OnInit {
     });
 
     var myCity = new BMap.LocalCity();
-    myCity.get((r)=>{
+    myCity.get((r) => {
       var cityName = r.name;
-      this.bdmap.setCenter(cityName,13);
-    }); 
+      this.bdmap.setCenter(cityName, 13);
+    });
   }
 
-  private pickMap(data){
+  private pickMap() {
     //最大化地图
     EventBus.dispatch(EventType.CLOSE_LEFT);
-    EventBus.dispatch(EventType.OPEN_MIDDLE,0);
+    EventBus.dispatch(EventType.OPEN_MIDDLE, 0);
     //设置光标为十字光标
     this.bdmap.setDefaultCursor('crosshair');
 
     //监听鼠标右键，取消
-    this.bdmap.addEventListener('rightclick',e=>{this.onRightClick()})
+    this.bdmap.addEventListener('rightclick', e => { this.onRightClick() })
 
     this.isPickMap = true;
   }
@@ -305,6 +305,7 @@ export class MapComponent implements OnInit {
 
   /**判断多基站添加完毕侯，移除忙碌图标，设置地图中心 */
   private onAddOverlay() {
+    console.log('addoverlay')
     if (!this.isBatchDisplay)
       return;
     this.overlayIndex++;
@@ -347,7 +348,6 @@ export class MapComponent implements OnInit {
       stations = Record.toStations(records);
       this.ShowLocations(stations);
     }
-    EventBus.dispatch(EventType.OPEN_MIDDLE, 1)
     EventBus.dispatch(EventType.SHOW_RECORDS, { data: records, state: Model.RECORDS_STATE });
   }
 
@@ -457,20 +457,20 @@ export class MapComponent implements OnInit {
       this.drawingManager._drawingTool.hide();
     }
 
-    if(this.isPickMap){
+    if (this.isPickMap) {
       console.log(e.point.lat + "--" + e.point.lng);
       this.isPickMap = false;
-      let data:any={};
+      let data: any = {};
       data.lat = e.point.lat;
       data.lng = e.point.lng;
-      EventBus.dispatch(EventType.PICK_MAP_COMPLETE,data);
+      EventBus.dispatch(EventType.PICK_MAP_COMPLETE, data);
       this.bdmap.setDefaultCursor(this.defaultCursor);
     }
   }
 
-  onRightClick(){
-    this.bdmap.removeEventListener('rightclick',this.onRightClick)
-    EventBus.dispatch(EventType.OPEN_MIDDLE,1);
+  onRightClick() {
+    this.bdmap.removeEventListener('rightclick', this.onRightClick)
+    EventBus.dispatch(EventType.OPEN_MIDDLE, 1);
     this.isPickMap = false;
     this.bdmap.setDefaultCursor(this.defaultCursor);
   }

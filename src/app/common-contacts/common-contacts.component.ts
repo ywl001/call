@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, Input } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, Input, ComponentRef } from '@angular/core';
 import { gsap } from 'gsap';
 import { MatSelectionList, MatListOption } from '@angular/material';
 import * as toastr from 'toastr'
@@ -20,8 +20,10 @@ export class CommonContactsComponent {
 
   @Input() tables:string[];
 
+  public itself:ComponentRef<CommonContactsComponent>;
+
   onClickCancel(){
-    gsap.to("#commonContactsContainer",0.5,{left:'-310px'});
+    this.close();
   }
 
   onClickOk(commonContacts:MatSelectionList){
@@ -40,7 +42,7 @@ export class CommonContactsComponent {
       this.dbService.getAllCommonContacts(allCombinations)
       .done(res=>{EventBus.dispatch(EventType.SHOW_RECORDS,{data:res,state:Model.COMMON_CONTACTS_STATE});});
     }
-    gsap.to("#commonContactsContainer",0.5,{left:'-310px'});
+    this.close();
   }
 
   //获取数组内值的所有组合
@@ -81,4 +83,13 @@ export class CommonContactsComponent {
     return res;
   }
 
+  private close(){
+    let element =<HTMLElement>this.itself.location.nativeElement;
+    //注意回调函数的写法，直接写this.onTeenComplete,会造成this.itself undefine
+    gsap.to(element,{left:-360,onComplete:()=>{this.onTeenComplete()}})
+  }
+
+  private onTeenComplete(){
+    this.itself.destroy();
+  }
 }

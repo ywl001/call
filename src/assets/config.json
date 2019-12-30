@@ -1,4 +1,5 @@
 {
     "sqlUrl": "/huadan/sql.php",
-    "isGetLocation": false
+    "isGetLocation": false,
+    "labelType":1
 }

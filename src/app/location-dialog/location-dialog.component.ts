@@ -1,19 +1,19 @@
 import { Component, OnInit, Inject, ViewChild, ViewContainerRef, Input, ComponentRef } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { DbService } from '../services/db.service';
 import { Model } from '../models/model';
 import * as EventBus from 'eventbusjs';
 import { EventType } from '../models/event-type';
 import * as toastr from 'toastr'
+import { gsap } from 'gsap';
 
 declare var gcoord;
 
 @Component({
-  selector: 'app-position',
-  templateUrl: './position.component.html',
-  styleUrls: ['./position.component.css']
+  selector: 'app-location-dialog',
+  templateUrl: './location-dialog.component.html',
+  styleUrls: ['./location-dialog.component.css']
 })
-export class PositionComponent {
+export class LocationDialogComponent implements OnInit {
 
   public lat;
   public lng;
@@ -23,7 +23,7 @@ export class PositionComponent {
   
   @Input() data:any;
 
-  itself:ComponentRef<PositionComponent>;
+  itself:ComponentRef<LocationDialogComponent>;
 
   constructor(
     private dbService: DbService
@@ -34,10 +34,12 @@ export class PositionComponent {
   ngOnInit(): void {
   }
 
+  //取消
   onCancel() {
     this.close();
   }
 
+  //提交
   onSubmit() {
     if (!this.validateInput())
       return;
@@ -107,6 +109,7 @@ export class PositionComponent {
     this.close();
   }
 
+  //点击从地图选择坐标
   onPickFromMap() {
     console.log('pick');
     let element = <HTMLElement>this.itself.location.nativeElement;
@@ -115,6 +118,7 @@ export class PositionComponent {
     EventBus.dispatch(EventType.PICK_MAP,this.data)
   }
 
+  //选择完成后
   pickMapComplete(data){
     let element = <HTMLElement>this.itself.location.nativeElement;
     element.style.display = 'block';
@@ -122,6 +126,7 @@ export class PositionComponent {
     this.lng = data.lng;
   }
 
+  //验证输入
   private validateInput() {
     let minLng = 73
     let maxLng = 135
@@ -129,6 +134,11 @@ export class PositionComponent {
     let maxLat = 53;
     let lat = parseFloat(this.lat);
     let lng = parseFloat(this.lng);
+
+    if(this.data.lac=='' || this.data.ci==''){
+      toastr.error('不要修改空值');
+      return false;
+    }
 
     if (!lat || !lng) {
       toastr.error('请输入数字');

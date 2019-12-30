@@ -7,18 +7,15 @@
     (dblclick)=onDoubleClickMiddle()>
     <app-grid></app-grid>
   </div>
-  
+
   <div id="rightContainer" (dblclick)=onDoubleClickRight()>
     <router-outlet></router-outlet>
   </div>
 
   <div id="btnToggleLeft" class="toggleLeft" (click)="onToggleLeft()"></div>
 
-  <div id="commonContactsContainer">
-    <ng-template #commonContacts></ng-template>
-  </div>
-
   <div class="preLoad loader loader-default " [class.is-active]="isShowBusyIcon"></div>
-
+  
+  <ng-template #commonContacts></ng-template>
   <ng-template #dialog></ng-template>
 </div>
