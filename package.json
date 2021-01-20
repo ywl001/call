@@ -26,7 +26,7 @@
     "angular2-draggable": "^2.3.2",
     "eventbusjs": "^0.2.0",
     "gcoord": "^0.2.3",
-    "gsap": "^3.0.1",
+    "gsap": "^3.6.0",
     "hammerjs": "^2.0.8",
     "pure-css-loader": "^3.3.3",
     "rxjs": "~6.4.0",
